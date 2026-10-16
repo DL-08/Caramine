@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E63B2E'><polygon points='12 2 2 22 22 22'/></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Caramine — High-Tech Sleek Expense Tracker</title>
+    <!-- Google Fonts: Space Grotesk, DM Serif Display, Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-6W48XWTf.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DnevABM0.css">
+  </head>
+  <body class="bg-offwhite text-dark antialiased selection:bg-signal selection:text-white">
+    <!-- SVG Noise Filter for Global Texture -->
+    <svg class="pointer-events-none fixed isolate z-50 opacity-0" aria-hidden="true">
+      <filter id="noiseFilter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+    </svg>
+    <div id="noise-overlay" class="pointer-events-none fixed inset-0 z-50 opacity-[0.05]" style="filter: url(#noiseFilter); background: transparent;"></div>
+    
+    <div id="root"></div>
+  </body>
+</html>
