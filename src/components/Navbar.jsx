@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, ArrowUpRight, Menu, X, ShieldAlert, Cpu } from 'lucide-react';
 
-export default function Navbar({ onOpenTracker }) {
+export default function Navbar({ onOpenTracker, onOpenDashboard }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -47,7 +47,14 @@ export default function Navbar({ onOpenTracker }) {
           </a>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-mono tracking-wider uppercase">
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-mono tracking-wider uppercase">
+            <button
+              onClick={onOpenDashboard}
+              className="text-signal font-bold hover:text-white interactive-lift flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-signal"></span>
+              // Dashboard
+            </button>
             <a
               href="#features"
               className="text-white/70 hover:text-signal interactive-lift"
@@ -77,12 +84,12 @@ export default function Navbar({ onOpenTracker }) {
           {/* Right Action CTA Button */}
           <div className="flex items-center gap-3">
             <button
-              onClick={onOpenTracker}
+              onClick={onOpenDashboard || onOpenTracker}
               className="btn-magnetic group relative overflow-hidden rounded-full bg-signal px-4 sm:px-6 py-2 sm:py-2.5 text-xs font-mono font-bold uppercase tracking-wider text-white border border-signal shadow-brutalist-signal"
             >
               <span className="btn-slide bg-black"></span>
               <span className="btn-content relative z-10 flex items-center gap-1.5">
-                <span>Track Expenses</span>
+                <span>Launch App</span>
                 <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>
             </button>
@@ -102,7 +109,16 @@ export default function Navbar({ onOpenTracker }) {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-dark/95 backdrop-blur-2xl flex flex-col justify-center items-center p-8 md:hidden">
-          <nav className="flex flex-col items-center gap-8 text-lg font-mono tracking-widest uppercase text-center">
+          <nav className="flex flex-col items-center gap-7 text-lg font-mono tracking-widest uppercase text-center">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenDashboard) onOpenDashboard();
+              }}
+              className="text-signal font-bold hover:underline transition-colors flex items-center gap-2"
+            >
+              <span>// Open Dashboard</span>
+            </button>
             <a
               href="#features"
               onClick={() => setMobileMenuOpen(false)}
