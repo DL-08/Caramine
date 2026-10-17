@@ -4,29 +4,25 @@ import AddTransactionForm from './AddTransactionForm';
 import VisualAnalytics from './VisualAnalytics';
 import RecentTransactionsList from './RecentTransactionsList';
 import EditTransactionModal from './EditTransactionModal';
+import PeerSplitPanel from './PeerSplitPanel';
 import { transactionService } from '../../services/transactionService';
-import { 
-  ArrowLeft, 
-  Download, 
-  Database, 
-  Terminal, 
-  Cpu, 
-  CheckCircle2, 
-  AlertCircle,
-  Sparkles,
-  Layers,
-  SlidersHorizontal
+import {
+  ArrowLeft,
+  Download,
+  Database,
+  Terminal,
+  Users,
 } from 'lucide-react';
 
-export default function CarmineDashboard({ onBackToLanding, isEmbedded = true }) {
+export default function CarmineDashboard({ onBackToLanding }) {
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [backendNoticeOpen, setBackendNoticeOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('ledger'); // 'ledger' | 'split'
 
-  // Load transactions on mount
   useEffect(() => {
     loadTransactions();
   }, []);
@@ -36,8 +32,7 @@ export default function CarmineDashboard({ onBackToLanding, isEmbedded = true })
     try {
       const data = await transactionService.getAll();
       setTransactions(data);
-      const computedSummary = transactionService.calculateSummary(data);
-      setSummary(computedSummary);
+      setSummary(transactionService.calculateSummary(data));
     } catch (err) {
       console.error('Error fetching transactions:', err);
     } finally {
@@ -45,26 +40,23 @@ export default function CarmineDashboard({ onBackToLanding, isEmbedded = true })
     }
   };
 
-  // Add new transaction handler
   const handleAddTransaction = async (newTx) => {
     const created = await transactionService.create(newTx);
-    const updatedTransactions = [created, ...transactions];
-    setTransactions(updatedTransactions);
-    setSummary(transactionService.calculateSummary(updatedTransactions));
+    const updated = [created, ...transactions];
+    setTransactions(updated);
+    setSummary(transactionService.calculateSummary(updated));
   };
 
-  // Edit transaction handler
   const handleOpenEdit = (tx) => {
     setEditingTransaction(tx);
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = async (id, updatedFields) => {
-    await transactionService.update(id, updatedFields);
+  const handleSaveEdit = async (id, fields) => {
+    await transactionService.update(id, fields);
     await loadTransactions();
   };
 
-  // Delete transaction handler
   const handleDeleteTransaction = async (id) => {
     await transactionService.delete(id);
     const updated = transactions.filter((t) => t.id !== id);
@@ -72,16 +64,14 @@ export default function CarmineDashboard({ onBackToLanding, isEmbedded = true })
     setSummary(transactionService.calculateSummary(updated));
   };
 
-  // Reset to initial seed
   const handleResetSeed = async () => {
-    if (window.confirm('Reset all transaction data back to default demo seed?')) {
+    if (window.confirm('Reset all transaction data to default demo seed?')) {
       const resetData = await transactionService.resetToSeed();
       setTransactions(resetData);
       setSummary(transactionService.calculateSummary(resetData));
     }
   };
 
-  // Export CSV
   const handleExportCSV = () => {
     const headers = ['ID,Title,Amount,Type,Category,Date,CreatedAt\n'];
     const rows = transactions.map(
@@ -98,101 +88,154 @@ export default function CarmineDashboard({ onBackToLanding, isEmbedded = true })
   };
 
   return (
-    <section id="dashboard" className="relative w-full py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-offwhite text-dark scroll-mt-20">
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header & Control Panel */}
-        <div className="mb-10 pb-6 border-b-2 border-dark flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-signal font-bold mb-3">
-              <span className="w-2 h-2 rounded-full bg-signal animate-signal-pulse"></span>
-              <span>■ SECTION 00 // LIVE COCKPIT & LEDGER ENGINE</span>
+    <div className="min-h-screen bg-offwhite text-dark selection:bg-signal selection:text-white">
+      {/* ── Sticky App Bar ── */}
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b-2 border-dark/10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-dark flex items-center justify-center">
+              <span className="w-2.5 h-2.5 rounded-full bg-signal animate-signal-pulse"></span>
             </div>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-heading font-extrabold uppercase tracking-tight text-dark">
-              Carmine Dashboard.
-            </h2>
-            <p className="mt-2 text-dark/70 font-sans text-base sm:text-lg max-w-2xl">
-              Real-time financial telemetry engine. Log expenses, monitor cash flow, inspect visual category breakdowns, and export PostgreSQL-ready ledgers.
-            </p>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-heading font-extrabold text-lg sm:text-xl tracking-tight text-dark uppercase">
+                  CARMINE
+                </span>
+                <span className="text-signal text-sm font-mono">■</span>
+                <span className="px-2 py-0.5 rounded-full bg-signal/10 text-signal font-mono text-[10px] font-bold uppercase tracking-wider">
+                  DASHBOARD
+                </span>
+              </div>
+              <p className="text-[10px] font-mono text-dark/40 hidden sm:block">
+                POSTGRESQL-COMPATIBLE LEDGER ENGINE
+              </p>
+            </div>
           </div>
 
-          {/* Action Navigation Controls */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Backend Integration Info Toggle */}
+          {/* Actions */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setBackendNoticeOpen(!backendNoticeOpen)}
-              className="px-3.5 py-2 rounded-xl bg-white hover:bg-dark hover:text-white border-2 border-dark font-mono text-xs font-bold text-dark flex items-center gap-1.5 transition-colors shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-offwhite hover:bg-dark/5 border border-dark/10 font-mono text-xs font-semibold text-dark/70 flex items-center gap-1.5 transition-colors"
             >
               <Database className="w-3.5 h-3.5 text-signal" />
-              <span>Backend Architecture</span>
+              <span className="hidden sm:inline">Backend Schema</span>
             </button>
 
-            {/* Export CSV Button */}
             <button
               onClick={handleExportCSV}
-              className="px-3.5 py-2 rounded-xl bg-white hover:bg-dark hover:text-white border-2 border-dark font-mono text-xs font-bold text-dark flex items-center gap-1.5 transition-colors shadow-sm"
-              title="Export ledger to CSV"
+              className="px-3 py-1.5 rounded-xl bg-offwhite hover:bg-dark/5 border border-dark/10 font-mono text-xs font-semibold text-dark/70 flex items-center gap-1.5 transition-colors"
             >
-              <Download className="w-3.5 h-3.5 text-signal" />
-              <span>Export CSV</span>
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Export CSV</span>
             </button>
+
+            {onBackToLanding && (
+              <button
+                onClick={onBackToLanding}
+                className="btn-magnetic group px-4 py-1.5 rounded-xl bg-dark text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                <span>Landing</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Backend Architecture Notice Banner (Collapsible) */}
-        {backendNoticeOpen && (
-          <div className="mb-8 rounded-3xl bg-dark text-white border-2 border-signal p-5 sm:p-7 transition-all animate-in fade-in shadow-dark-soft">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-xs">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-signal font-bold text-sm">
-                  <Terminal className="w-4 h-4" />
-                  <span>FULL-STACK ARCHITECTURE READY // EXPRESS + NODE.JS + POSTGRESQL</span>
-                </div>
-                <p className="text-white/80 font-sans text-xs sm:text-sm max-w-3xl leading-relaxed">
-                  Every UI action flows through the modular <code className="text-signal bg-white/10 px-1.5 py-0.5 rounded">src/services/transactionService.js</code>. 
-                  Connect this to your Express REST API (<code className="text-white font-semibold">GET /api/transactions</code>, <code className="text-white font-semibold">POST /api/transactions</code>) and PostgreSQL table without touching the frontend components.
-                </p>
+        {/* Tab Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-1 pb-0 border-t border-dark/5">
+          <button
+            onClick={() => setActiveTab('ledger')}
+            className={`px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+              activeTab === 'ledger'
+                ? 'border-signal text-signal'
+                : 'border-transparent text-dark/40 hover:text-dark'
+            }`}
+          >
+            Ledger & Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab('split')}
+            className={`px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-1.5 ${
+              activeTab === 'split'
+                ? 'border-signal text-signal'
+                : 'border-transparent text-dark/40 hover:text-dark'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            Peer Split
+          </button>
+        </div>
+      </header>
+
+      {/* ── Backend Notice ── */}
+      {backendNoticeOpen && (
+        <div className="bg-dark text-white border-b-2 border-signal px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-xs">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-signal font-bold">
+                <Terminal className="w-4 h-4" />
+                <span>EXPRESS + NODE.JS + POSTGRESQL ARCHITECTURE READY</span>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">
-                  ✓ Schema Validated
-                </span>
-                <button
-                  onClick={() => setBackendNoticeOpen(false)}
-                  className="px-4 py-1.5 rounded-xl bg-signal text-white font-bold hover:bg-signal-hover transition-colors"
-                >
-                  Close
-                </button>
-              </div>
+              <p className="text-white/70 font-sans text-sm">
+                Swap{' '}
+                <code className="text-signal bg-white/10 px-1 rounded">
+                  transactionService.js
+                </code>{' '}
+                methods with REST calls to{' '}
+                <code className="text-white/90">GET /api/transactions</code>,{' '}
+                <code className="text-white/90">POST /api/transactions</code>.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-[11px] font-bold">
+                ✓ Schema Validated
+              </span>
+              <button
+                onClick={() => setBackendNoticeOpen(false)}
+                className="px-3 py-1 rounded bg-signal text-white font-bold hover:bg-signal-hover"
+              >
+                Dismiss
+              </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Main Workspace ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+        {activeTab === 'ledger' && (
+          <>
+            {/* Overview Cards */}
+            <HeaderOverview summary={summary} />
+
+            {/* Add Transaction + Donut Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-8 items-stretch">
+              <div className="lg:col-span-5 flex flex-col">
+                <AddTransactionForm onAddTransaction={handleAddTransaction} />
+              </div>
+              <div className="lg:col-span-7 flex flex-col">
+                <VisualAnalytics summary={summary} />
+              </div>
+            </div>
+
+            {/* Recent Transactions */}
+            <RecentTransactionsList
+              transactions={transactions}
+              onEditTransaction={handleOpenEdit}
+              onDeleteTransaction={handleDeleteTransaction}
+              onResetSeed={handleResetSeed}
+            />
+          </>
         )}
 
-        {/* Section 1: Header / Overview Cards */}
-        <HeaderOverview summary={summary} />
+        {activeTab === 'split' && (
+          <PeerSplitPanel transactions={transactions} />
+        )}
+      </main>
 
-        {/* Section 2 & 3: Two-column grid (Add Transaction Form + Visual Analytics Donut Chart) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-8 items-stretch">
-          {/* Add Transaction Component (5 cols on lg) */}
-          <div className="lg:col-span-5 flex flex-col">
-            <AddTransactionForm onAddTransaction={handleAddTransaction} />
-          </div>
-
-          {/* Visual Analytics Placeholder Container (7 cols on lg) */}
-          <div className="lg:col-span-7 flex flex-col">
-            <VisualAnalytics summary={summary} />
-          </div>
-        </div>
-
-        {/* Section 4: Recent Transactions List Table / Card View */}
-        <RecentTransactionsList
-          transactions={transactions}
-          onEditTransaction={handleOpenEdit}
-          onDeleteTransaction={handleDeleteTransaction}
-          onResetSeed={handleResetSeed}
-        />
-      </div>
-
-      {/* Edit Transaction Modal */}
+      {/* Edit Modal */}
       <EditTransactionModal
         transaction={editingTransaction}
         isOpen={isEditModalOpen}
@@ -200,6 +243,6 @@ export default function CarmineDashboard({ onBackToLanding, isEmbedded = true })
         onSave={handleSaveEdit}
         onDelete={handleDeleteTransaction}
       />
-    </section>
+    </div>
   );
 }

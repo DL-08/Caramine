@@ -1,58 +1,43 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import CarmineDashboard from './components/dashboard/CarmineDashboard';
 import Features from './components/Features';
 import Philosophy from './components/Philosophy';
 import Protocol from './components/Protocol';
 import Pricing from './components/Pricing';
 import Footer from './components/Footer';
 import ExpenseModal from './components/ExpenseModal';
+import CarmineDashboard from './components/dashboard/CarmineDashboard';
 
 export default function App() {
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'dashboard'
   const [trackerOpen, setTrackerOpen] = useState(false);
 
-  const scrollToDashboard = () => {
-    const el = document.getElementById('dashboard');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // Dashboard page
+  if (currentView === 'dashboard') {
+    return (
+      <CarmineDashboard onBackToLanding={() => setCurrentView('landing')} />
+    );
+  }
 
+  // Landing page
   return (
     <div className="relative min-h-screen bg-offwhite text-dark selection:bg-signal selection:text-white">
-      {/* Floating Island Navigation */}
-      <Navbar 
-        onOpenTracker={() => setTrackerOpen(true)} 
-        onOpenDashboard={scrollToDashboard} 
+      <Navbar
+        onOpenTracker={() => setTrackerOpen(true)}
+        onOpenDashboard={() => setCurrentView('dashboard')}
       />
 
       <main>
-        {/* The Opening Shot */}
-        <Hero 
-          onOpenTracker={scrollToDashboard} 
-        />
-
-        {/* Live Carmine Cockpit & Functionality Dashboard */}
-        <CarmineDashboard isEmbedded={true} />
-
-        {/* Interactive Functional Artifacts */}
+        <Hero onOpenTracker={() => setCurrentView('dashboard')} />
         <Features />
-
-        {/* The Manifesto */}
         <Philosophy />
-
-        {/* Sticky Stacking Archive */}
         <Protocol />
-
-        {/* Membership / Pricing */}
-        <Pricing onOpenTracker={scrollToDashboard} />
+        <Pricing onOpenTracker={() => setCurrentView('dashboard')} />
       </main>
 
-      {/* Deep Footer with Operational Status */}
-      <Footer onOpenTracker={scrollToDashboard} />
+      <Footer onOpenTracker={() => setCurrentView('dashboard')} />
 
-      {/* Interactive Expense Tracker Benchmark Modal */}
       <ExpenseModal
         isOpen={trackerOpen}
         onClose={() => setTrackerOpen(false)}

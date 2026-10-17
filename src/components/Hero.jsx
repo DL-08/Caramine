@@ -54,16 +54,6 @@ export default function Hero({ onOpenTracker }) {
         </div>
       </div>
 
-      {/* Decorative Monospace Coordinate HUD */}
-      <div className="absolute top-28 right-6 sm:right-12 z-10 hidden sm:flex flex-col items-end gap-1.5 text-[10px] font-mono text-white/40 tracking-wider">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-signal"></span>
-          <span className="text-white/70">LATENCY // 0.8 SECONDS</span>
-        </div>
-        <div>SYS: CARAMINE-SIGNAL-v4.2</div>
-        <div>COORDINATES: 35.6762° N / 139.6503° E</div>
-        <div className="text-signal/80 font-bold">MODE: CONTINUOUS TELEMETRY</div>
-      </div>
 
       {/* Bottom-left third content container */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-12 md:px-20 pb-16 sm:pb-24">

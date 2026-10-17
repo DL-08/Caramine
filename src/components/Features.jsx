@@ -445,22 +445,10 @@ export default function Features() {
     <section id="features" className="relative w-full py-24 sm:py-32 px-6 sm:px-12 md:px-20 bg-paper">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="mb-16 sm:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-dark pb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-signal font-bold mb-3">
-              <span>■ SECTION 01 // FUNCTIONAL ARTIFACTS</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-heading font-extrabold uppercase tracking-tight text-dark">
-              Software Micro-UIs.
-            </h2>
-            <p className="mt-2 text-dark/70 font-sans text-lg max-w-xl">
-              No static promises. Three live behavioral engines designed to eliminate friction at every transaction frontier.
-            </p>
-          </div>
-
-          <div className="font-mono text-xs text-dark/60 max-w-xs text-left md:text-right">
-            [INTERACTION PROTOCOLS BUILT FOR KINETIC TELEMETRY]
-          </div>
+        <div className="mb-16 sm:mb-20 border-b-2 border-dark pb-8">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-heading font-extrabold uppercase tracking-tight text-dark">
+            Software Micro-UIs.
+          </h2>
         </div>
 
         {/* 3 Interactive Cards Grid */}
